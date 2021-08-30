@@ -30,7 +30,9 @@ export type Mutation = {
   __typename?: 'Mutation';
   createPost?: Maybe<Post>;
   updatePost?: Maybe<Post>;
+  sendToken: UserResponse;
   noPhoneLogin: UserResponse;
+  phoneLoginOrRegister: UserResponse;
 };
 
 
@@ -45,13 +47,29 @@ export type MutationUpdatePostArgs = {
 };
 
 
+export type MutationSendTokenArgs = {
+  phone: Scalars['String'];
+};
+
+
 export type MutationNoPhoneLoginArgs = {
   options: PhonePasswordInput;
+};
+
+
+export type MutationPhoneLoginOrRegisterArgs = {
+  password?: Maybe<Scalars['String']>;
+  options: PhoneTokenInput;
 };
 
 export type PhonePasswordInput = {
   phone: Scalars['String'];
   password: Scalars['String'];
+};
+
+export type PhoneTokenInput = {
+  phone: Scalars['String'];
+  token: Scalars['String'];
 };
 
 export type Post = MongoClass & {
@@ -95,7 +113,15 @@ export type UserResponse = {
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename: 'Post', id: string, createdAt: string, updatedAt: string, title: string }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, createdAt: string, updatedAt: string, title: string }> };
+
+export type NoPhoneLoginsMutationVariables = Exact<{
+  phone: Scalars['String'];
+  password: Scalars['String'];
+}>;
+
+
+export type NoPhoneLoginsMutation = { __typename?: 'Mutation', noPhoneLogin: { __typename?: 'UserResponse', errors?: Maybe<Array<{ __typename?: 'FieldError', field: string, message: string }>>, user?: Maybe<{ __typename?: 'User', id: string, phone: string, role: string }> } };
 
 
 export const PostsDocument = gql`
@@ -105,11 +131,29 @@ export const PostsDocument = gql`
     createdAt
     updatedAt
     title
-    __typename
   }
 }
     `;
 
 export function usePostsQuery(options: Omit<Urql.UseQueryArgs<PostsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostsQuery>({ query: PostsDocument, ...options });
+};
+export const NoPhoneLoginsDocument = gql`
+    mutation NoPhoneLogins($phone: String!, $password: String!) {
+  noPhoneLogin(options: {phone: $phone, password: $password}) {
+    errors {
+      field
+      message
+    }
+    user {
+      id
+      phone
+      role
+    }
+  }
+}
+    `;
+
+export function useNoPhoneLoginsMutation() {
+  return Urql.useMutation<NoPhoneLoginsMutation, NoPhoneLoginsMutationVariables>(NoPhoneLoginsDocument);
 };
