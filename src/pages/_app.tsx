@@ -18,4 +18,5 @@ const MyApp = ({ Component, pageProps }: any) => {
 
 export default withUrqlClient((_ssrExchange, ctx) => ({
 	url: 'http://localhost:5000/graphql',
+	fetchOptions: { credentials: 'include' as const },
 }))(MyApp)

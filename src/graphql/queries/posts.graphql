@@ -1,8 +1,10 @@
 query Posts {
 	posts {
 		id
-		createdAt
-		updatedAt
 		title
+		creator {
+			id
+			phone
+		}
 	}
 }

@@ -1,22 +1,52 @@
-import React, { useEffect } from 'react'
-import { useNoPhoneLoginsMutation } from '../generated/graphql'
+import { Box, Button } from '@chakra-ui/react'
+import { Form, Formik } from 'formik'
+import React from 'react'
+import { useCreatePostMutation, usePostsQuery } from '../generated/graphql'
+import { InputField } from './components/InputField'
+import { NavBar } from './src/conponents/NavBar'
 
 interface indexProps {}
 
 const index: React.FC<indexProps> = () => {
-	const [{ fetching, data }, noPhoneLogin] = useNoPhoneLoginsMutation()
-	console.log(data)
-	useEffect(() => {
-		;(async () => {
-			const phone = '18023281269'
-			const password = '123456'
-			await noPhoneLogin({ phone, password })
-		})()
-	}, [])
-	if (fetching) return <p>waiting</p>
+	const [{ data }] = usePostsQuery()
+	const [, createPost] = useCreatePostMutation()
+	const add = async (post: any) => {
+		const title = { title: '' }
+		title.title = post.title
+		const result = await createPost(title)
+	}
 	return (
 		<div>
-			<p></p>
+			<NavBar />
+			<Formik
+				initialValues={{ title: '' }}
+				onSubmit={async (values, { setSubmitting }) => {
+					await add(values)
+					setSubmitting(false)
+				}}
+			>
+				<Form>
+					<InputField name='title' label='title' placeholder='请输入title' />
+					<Button type='submit' colorScheme='blue' size='md' mt={4}>
+						提交
+					</Button>
+				</Form>
+			</Formik>
+			<ul>
+				{!data ? (
+					<Box>正在读取</Box>
+				) : (
+					<Box>
+						{data.posts.map((post) => {
+							return (
+								<div key={post.id}>
+									{post.title}----creator:{post.creator.id}
+								</div>
+							)
+						})}
+					</Box>
+				)}
+			</ul>
 		</div>
 	)
 }

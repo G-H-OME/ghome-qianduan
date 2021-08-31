@@ -1,4 +1,4 @@
-mutation NoPhoneLogins($phone: String!, $password: String!) {
+mutation NoPhoneLogin($phone: String!, $password: String!) {
 	noPhoneLogin(options: { phone: $phone, password: $password }) {
 		errors {
 			field
@@ -7,7 +7,6 @@ mutation NoPhoneLogins($phone: String!, $password: String!) {
 		user {
 			id
 			phone
-			role
 		}
 	}
 }
