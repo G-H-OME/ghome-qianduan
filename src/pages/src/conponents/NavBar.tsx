@@ -26,7 +26,7 @@ export const NavBar: React.FC<NavBarProps> = () => {
 	} else {
 		body = (
 			<>
-				<NextLink href='/login'>
+				<NextLink href='/test'>
 					<Link mr={2}>注册&登陆</Link>
 				</NextLink>
 			</>

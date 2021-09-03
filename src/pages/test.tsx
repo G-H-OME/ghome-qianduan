@@ -11,12 +11,12 @@ interface testProps {}
 const test: React.FC<testProps> = () => {
 	const [, _login] = useNoPhoneLoginMutation()
 	const router = useRouter()
-	const login = async (user: any) => {
+	const login = async (user) => {
 		const options = { phone: '', password: '' }
 		options.phone = user.phone
 		options.password = user.password
 		const result = await _login(options)
-		if (!result.data) {
+		if (!result.data.noPhoneLogin.user) {
 			console.log('登录失败')
 		} else {
 			router.push('/')
@@ -26,9 +26,8 @@ const test: React.FC<testProps> = () => {
 		<Wrapper variant='small'>
 			<Formik
 				initialValues={{ phone: '', password: '' }}
-				onSubmit={async (values, { setSubmitting }) => {
+				onSubmit={async (values) => {
 					await login(values)
-					setSubmitting(false)
 				}}
 			>
 				<Form>
@@ -39,7 +38,7 @@ const test: React.FC<testProps> = () => {
 						placeholder='password'
 						type='password'
 					/>
-					<Button type='submit' colorScheme='blackAlpha' size='md' mt={4}>
+					<Button type='submit' colorScheme='facebook' size='md' mt={4}>
 						登陆
 					</Button>
 				</Form>

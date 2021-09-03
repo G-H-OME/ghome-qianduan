@@ -29,6 +29,7 @@ export type MongoClass = {
 export type Mutation = {
   __typename?: 'Mutation';
   createPost?: Maybe<Post>;
+  deletePost: Scalars['Boolean'];
   updatePost?: Maybe<Post>;
   sendToken: UserResponse;
   noPhoneLogin: UserResponse;
@@ -39,6 +40,11 @@ export type Mutation = {
 
 export type MutationCreatePostArgs = {
   title: Scalars['String'];
+};
+
+
+export type MutationDeletePostArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -86,6 +92,7 @@ export type Query = {
   __typename?: 'Query';
   hello: Scalars['String'];
   posts: Array<Post>;
+  myPosts: Array<Post>;
   post?: Maybe<Post>;
   me?: Maybe<User>;
 };
@@ -93,6 +100,11 @@ export type Query = {
 
 export type QueryPostArgs = {
   id: Scalars['String'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  testSub: Scalars['String'];
 };
 
 export type User = MongoClass & {
@@ -112,17 +124,24 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
-
 export type CreatePostMutationVariables = Exact<{
   title: Scalars['String'];
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost?: Maybe<{ __typename?: 'Post', id: string, creator: { __typename?: 'User', id: string } }> };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost?: Maybe<{ __typename?: 'Post', id: string, title: string, creator: { __typename?: 'User', id: string, phone: string } }> };
+
+export type DeletePostMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost: boolean };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type NoPhoneLoginMutationVariables = Exact<{
   phone: Scalars['String'];
@@ -158,7 +177,37 @@ export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, title: string, creator: { __typename?: 'User', id: string, phone: string } }> };
 
+export type HelloSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
+
+export type HelloSubscription = { __typename?: 'Subscription', testSub: string };
+
+
+export const CreatePostDocument = gql`
+    mutation CreatePost($title: String!) {
+  createPost(title: $title) {
+    id
+    title
+    creator {
+      id
+      phone
+    }
+  }
+}
+    `;
+
+export function useCreatePostMutation() {
+  return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument);
+};
+export const DeletePostDocument = gql`
+    mutation DeletePost($id: String!) {
+  deletePost(id: $id)
+}
+    `;
+
+export function useDeletePostMutation() {
+  return Urql.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument);
+};
 export const LogoutDocument = gql`
     mutation Logout {
   logout
@@ -167,20 +216,6 @@ export const LogoutDocument = gql`
 
 export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
-};
-export const CreatePostDocument = gql`
-    mutation CreatePost($title: String!) {
-  createPost(title: $title) {
-    id
-    creator {
-      id
-    }
-  }
-}
-    `;
-
-export function useCreatePostMutation() {
-  return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument);
 };
 export const NoPhoneLoginDocument = gql`
     mutation NoPhoneLogin($phone: String!, $password: String!) {
@@ -262,4 +297,13 @@ export const PostsDocument = gql`
 
 export function usePostsQuery(options: Omit<Urql.UseQueryArgs<PostsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostsQuery>({ query: PostsDocument, ...options });
+};
+export const HelloDocument = gql`
+    subscription hello {
+  testSub
+}
+    `;
+
+export function useHelloSubscription<TData = HelloSubscription>(options: Omit<Urql.UseSubscriptionArgs<HelloSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<HelloSubscription, TData>) {
+  return Urql.useSubscription<HelloSubscription, TData, HelloSubscriptionVariables>({ query: HelloDocument, ...options }, handler);
 };

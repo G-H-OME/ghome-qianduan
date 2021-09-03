@@ -1,7 +1,13 @@
 import { Box, Button } from '@chakra-ui/react'
 import { Form, Formik } from 'formik'
 import React from 'react'
-import { useCreatePostMutation, usePostsQuery } from '../generated/graphql'
+import {
+	useCreatePostMutation,
+	useDeletePostMutation,
+	useHelloSubscription,
+	useMeQuery,
+	usePostsQuery,
+} from '../generated/graphql'
 import { InputField } from './components/InputField'
 import { NavBar } from './src/conponents/NavBar'
 
@@ -9,8 +15,16 @@ interface indexProps {}
 
 const index: React.FC<indexProps> = () => {
 	const [{ data }] = usePostsQuery()
+	const [me] = useMeQuery()
+	const [hello] = useHelloSubscription()
+	console.log(hello)
+
 	const [, createPost] = useCreatePostMutation()
-	const add = async (post: any) => {
+	const [, deletePost] = useDeletePostMutation()
+	const del = async (post) => {
+		await deletePost({ id: post.id })
+	}
+	const add = async (post) => {
 		const title = { title: '' }
 		title.title = post.title
 		const result = await createPost(title)
@@ -20,9 +34,12 @@ const index: React.FC<indexProps> = () => {
 			<NavBar />
 			<Formik
 				initialValues={{ title: '' }}
-				onSubmit={async (values, { setSubmitting }) => {
-					await add(values)
-					setSubmitting(false)
+				onSubmit={async (values) => {
+					if (!me.data.me) {
+						alert('请先登录！🚨')
+					} else {
+						await add(values)
+					}
 				}}
 			>
 				<Form>
@@ -41,6 +58,13 @@ const index: React.FC<indexProps> = () => {
 							return (
 								<div key={post.id}>
 									{post.title}----creator:{post.creator.id}
+									<Button
+										onClick={() => {
+											del(post)
+										}}
+									>
+										删除
+									</Button>
 								</div>
 							)
 						})}
